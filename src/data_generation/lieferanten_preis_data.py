@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 
+#ACHTUNG Die datei Stimmt nicht mit den aus dem ER Diagramm konzeptierten Daten überein und ist somit Falsch.
+#Es fehlen ausserdem noch weitere csv Dateien um alles ins dbeaver zu laden
 # Pfade
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR.parent.parent / "data"

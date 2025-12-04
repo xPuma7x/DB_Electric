@@ -61,7 +61,7 @@ def get_schicht(stunde: int) -> str:
     else:
         return "Spaet"
 
-
+#Vertragsid kann NULL sein (ACHTUNG)
 def get_vertrag_id(standort_id: int, datum: pd.Timestamp) -> int:
     """Findet den gültigen Vertrag für Standort und Datum."""
     for vertrag_id, v in VERTRAEGE.items():
