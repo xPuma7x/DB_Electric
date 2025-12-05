@@ -75,9 +75,7 @@ def main():
     output_file = OUTPUT_DIR / "dim_vertrag.csv"
     df.to_csv(output_file, sep=";", index=False)
 
-    print(f"Gespeichert: {output_file}")
-    print(f"Zeilen: {len(df)}")
-    print(df)
+    print(f"dim_vertrag.csv erstellt mit {len(df)} Zeilen")
 
 
 if __name__ == "__main__":

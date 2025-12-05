@@ -62,12 +62,7 @@ def main():
     output_file = OUTPUT_DIR / "dim_zeit.csv"
     df.to_csv(output_file, sep=";", index=False)
 
-    print(f"Gespeichert: {output_file}")
-    print(f"Zeilen: {len(df):,}")
-    print("\nErste 5 Zeilen:")
-    print(df.head())
-    print("\nLetzte 5 Zeilen:")
-    print(df.tail())
+    print(f"dim_zeit.csv erstellt mit {len(df)} Zeilen")
 
 
 if __name__ == "__main__":

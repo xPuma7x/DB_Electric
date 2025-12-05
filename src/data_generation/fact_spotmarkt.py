@@ -44,12 +44,7 @@ def main():
     output_file = OUTPUT_DIR / "fact_spotmarkt.csv"
     df.to_csv(output_file, sep=";", index=False)
 
-    print(f"Gespeichert: {output_file}")
-    print(f"Zeilen: {len(df):,}")
-    print(f"Zeitraum: {df['zeit_id'].min()} - {df['zeit_id'].max()}")
-    print(
-        f"Preis: {df['preis_eur_kwh'].min():.4f} - {df['preis_eur_kwh'].max():.4f} €/kWh"
-    )
+    print(f"fact_spotmarkt.csv erstellt mit {len(df)} Zeilen")
 
 
 if __name__ == "__main__":

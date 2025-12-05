@@ -4,10 +4,13 @@ from src.queries.run_queries import main as run_queries
 
 
 def main():
-    print("Hello from db-electric!")
+    print("Starte Datenbank-Projekt")
     generate_all()
+    print("Daten generiert")
     load_to_sqlite()
+    print("Daten in SQLite geladen")
     run_queries()
+    print("Queries ausgeführt")
 
 
 if __name__ == "__main__":

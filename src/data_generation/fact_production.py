@@ -120,26 +120,7 @@ def main():
     output_file = OUTPUT_DIR / "fact_produktion.csv"
     df.to_csv(output_file, sep=";", index=False)
 
-    print(f"Gespeichert: {output_file}")
-    print(f"Zeilen: {len(df):,}")
-
-    # Statistiken
-    print("\nStatistiken:")
-    print(f"  Menge gut:    {df['menge_gut'].mean():,.0f} Ø pro Schicht")
-    print(f"  Ausschuss:    {df['menge_ausschuss'].mean():,.0f} Ø pro Schicht")
-    print(f"  Auslastung:   {df['auslastung_pct'].mean():.1f}% Ø")
-    print(f"  Laufzeit:     {df['laufzeit_minuten'].mean():.0f} min Ø")
-
-    # Pro Standort (für Frage 1: Ausreißer prüfen)
-    print("\nMenge pro Standort:")
-    df_mit_standort = df.copy()
-    df_mit_standort["standort_id"] = df_mit_standort["linie_id"].apply(
-        lambda x: LINIEN[x]["standort_id"]
-    )
-    df_mit_standort["standort"] = df_mit_standort["standort_id"].apply(
-        lambda x: STANDORTE[x]["code"]
-    )
-    print(df_mit_standort.groupby("standort")["menge_gut"].mean().round(0))
+    print(f"fact_produktion.csv erstellt mit {len(df)} Zeilen")
 
 
 if __name__ == "__main__":

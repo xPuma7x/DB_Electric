@@ -253,33 +253,7 @@ def main():
     output_file = OUTPUT_DIR / "fact_energie.csv"
     df.to_csv(output_file, sep=";", index=False)
 
-    print(f"\nGespeichert: {output_file}")
-    print(f"Zeilen: {len(df):,}")
-
-    # Statistiken
-    df_valid = df[df["messstatus"] == "OK"]
-    print("\nStatistiken (nur OK):")
-    print(f"  Verbrauch:     {df_valid['verbrauch_kwh'].mean():.2f} kWh Ø pro 15min")
-    print(f"  Leistung max:  {df_valid['leistung_max_kw'].mean():.0f} kW Ø")
-    print(f"  Leistung peak: {df_valid['leistung_max_kw'].max():.0f} kW")
-
-    # Lastspitzen > 500kW (für Frage 2)
-    spitzen = df_valid[df_valid["leistung_max_kw"] > 500]
-    print(
-        f"\nLastspitzen > 500kW: {len(spitzen):,} ({len(spitzen)/len(df_valid)*100:.1f}%)"
-    )
-
-    # Spitzen pro Standort
-    print("\nSpitzen > 500kW pro Standort:")
-    spitzen_mit_standort = spitzen.copy()
-    spitzen_mit_standort["standort_id"] = spitzen_mit_standort["linie_id"].apply(
-        lambda x: LINIEN[x]["standort_id"]
-    )
-    print(spitzen_mit_standort.groupby("standort_id").size())
-
-    # Messstatus-Verteilung
-    print("\nMessstatus:")
-    print(df["messstatus"].value_counts())
+    print(f"fact_energie.csv erstellt mit {len(df)} Zeilen")
 
 
 if __name__ == "__main__":

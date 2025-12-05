@@ -58,34 +58,11 @@ def main():
 
     df_out = pd.DataFrame(rows)
 
-    # Debug: Erste Zeilen
-    print("\nErste 3 Zeilen:")
-    print(df_out.head(3))
-
-    # Statistiken pro Lieferant
-    print("\nDurchschnittspreise pro Lieferant:")
-    for lieferant_id, (code, name, _, _) in LIEFERANTEN.items():
-        avg = df_out[df_out["lieferant_id"] == lieferant_id]["preis_eur_kwh"].mean()
-        print(f"  {name}: Ø {avg:.4f} €/kWh")
+    print(f"fact_lieferantenpreis.csv erstellt mit {len(df_out)} Zeilen")
 
     # Speichern
     output_file = OUTPUT_DIR / "fact_lieferantenpreis.csv"
     df_out.to_csv(output_file, sep=";", index=False)
-
-    # Prüfen ob Datei existiert und Größe
-    if output_file.exists():
-        size = output_file.stat().st_size
-        print(f"\nDatei erstellt: {output_file}")
-        print(f"Dateigroesse: {size:,} Bytes")
-
-        # Erste Zeilen der Datei lesen
-        with open(output_file, "r", encoding="utf-8") as f:
-            print("\nErste 3 Zeilen der CSV:")
-            for i, line in enumerate(f):
-                if i < 3:
-                    print(f"  {line.strip()}")
-    else:
-        print("\nFEHLER: Datei wurde nicht erstellt!")
 
 
 if __name__ == "__main__":
