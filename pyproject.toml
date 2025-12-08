@@ -1,9 +1,10 @@
 [project]
 name = "db-electric"
 version = "0.1.0"
-description = "Add your description here"
+description = "Stromkosten-Analysesystem für DHBW Datenbanken-Projekt"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
-    "pandas>=2.3.3",
+    "pandas>=2.0.0",
+    "matplotlib>=3.8.0",
 ]

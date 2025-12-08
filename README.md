@@ -8,7 +8,7 @@
 
 Dieses Projekt entwickelt ein Data-Engineering-System zur Analyse von Stromkosten in einem produzierenden Unternehmen mit 5 Standorten in Deutschland. Das System beantwortet drei datengetriebene Kernfragen für unterschiedliche Stakeholder.
 
-**Technologien:** Python 3.14, pandas, SQLite, uv
+**Technologien:** Python 3.12+, pandas, SQLite, uv
 
 ---
 
@@ -35,7 +35,7 @@ Dieses Projekt entwickelt ein Data-Engineering-System zur Analyse von Stromkoste
 
 | **Aspekt** | **Spezifikation** |
 |---|---|
-| **Stakeholder** | COO (Chief Operating Officer) |
+| **Stakeholder** | Produktionsleiter / COO |
 | **Entscheidung** | Optimierung der Schichtplanung und Lastverteilung zur Vermeidung von Spitzenlastgebühren. |
 | **Risiko** | Hohe Netzentgelte durch unkontrollierte Leistungsspitzen; Produktionsausfälle durch Überlastung. |
 | **Messgrößen** | Anzahl Lastspitzen (>500 kW), Durchschnitts-/Max-Leistung (kW), Auslastung (%). |
@@ -155,6 +155,9 @@ uv sync
 # Gesamtes Projekt ausführen (Generierung → Laden → Queries)
 uv run main.py
 
+# Oder mit args
+uv run main.py --skip-generate --skip-load --visualize
+
 # Oder einzelne Schritte:
 uv run src.data_generation.generate_all   # Daten generieren
 uv run src.data_loading.load_to_sqlite    # In SQLite laden
@@ -257,16 +260,15 @@ SELECT lieferant_name, avg_preis, aufschlag_pct, volatilitaet;
 
 Die Spalte `messstatus` enthält drei Werte:
 - `OK` (95%): Gültige Messung
-- `FEHLER` (3%): Defekter Sensor, Werte vorhanden aber fragwürdig
-- `NULL` (2%): Keine Messung möglich, `verbrauch_kwh` und `leistung_max_kw` sind NULL
+- `FEHLER` (5%): Defekter Sensor oder fehlende Werte
 
 **Beispiel aus den Queries:**
 ```sql
 -- Frage 1: Nur valide Messungen verwenden
 WHERE e.messstatus = 'OK'
 
--- Frage 2: NULL explizit ausschließen
-WHERE e.messstatus != 'NULL'
+-- Frage 2: Nur valide Messungen
+WHERE e.messstatus = 'OK'
 ```
 
 **Relevanz:** In echten Systemen können Sensorfehler, Netzausfälle oder Wartungsfenster zu NULL-Werten führen. Ohne korrekte Filterung würden Aggregationen verfälscht (z.B. falscher Durchschnitt durch Division mit weniger Zeilen).

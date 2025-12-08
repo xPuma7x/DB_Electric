@@ -133,3 +133,21 @@ CREATE INDEX idx_energie_linie ON fact_energie(linie_id);
 CREATE INDEX idx_spotmarkt_zeit ON fact_spotmarkt(zeit_id);
 CREATE INDEX idx_liefpreis_zeit ON fact_lieferantenpreis(zeit_id);
 CREATE INDEX idx_liefpreis_lieferant ON fact_lieferantenpreis(lieferant_id);
+CREATE INDEX idx_energie_vertrag ON fact_energie(vertrag_id);
+
+
+-- ============================================================
+-- AUFFANG-ZEILEN (für unbekannte/fehlende Dimensionswerte)
+-- ============================================================
+
+INSERT INTO dim_standort (standort_id, standort_code, standort_name, land, region)
+VALUES (-1, 'UNK', 'Unbekannter Standort', 'Unbekannt', 'Unbekannt');
+
+INSERT INTO dim_lieferant (lieferant_id, lieferant_code, lieferant_name, typ)
+VALUES (-1, 'UNK', 'Unbekannter Lieferant', 'Unbekannt');
+
+INSERT INTO dim_linie (linie_id, standort_id, linie_code, linie_name, technologie, nennleistung_kw)
+VALUES (-1, -1, 'UNK', 'Unbekannte Linie', 'Unbekannt', 0);
+
+INSERT INTO dim_vertrag (vertrag_id, lieferant_id, standort_id, vertragsnummer, gueltig_ab, gueltig_bis, grundpreis_eur_monat)
+VALUES (-1, -1, -1, 'UNBEKANNT', '1900-01-01', '9999-12-31', 0);
