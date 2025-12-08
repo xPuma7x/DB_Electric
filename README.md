@@ -16,7 +16,7 @@ Dieses Projekt entwickelt ein Data-Engineering-System zur Analyse von Stromkoste
 
 ### Frage 1: Stromkostenintensität (Finanz-Perspektive)
 
-**Kernfrage:** Welche Standorte wiesen im Zeitraum Q1–Q4 2024 strombezogene Stückkosten (€/Einheit) auf, die mehr als 15% über dem unternehmensweiten Durchschnitt lagen, und wie hat sich diese Abweichung quartalsweise entwickelt?
+**Kernfrage:** Welche Standorte wiesen im Zeitraum Q1–Q4 2024 strombezogene Stückkosten (€/Einheit) auf, die mehr als 15% über dem unternehmensweiten Durchschnitt lagen?
 
 | **Aspekt** | **Spezifikation** |
 |---|---|
@@ -31,7 +31,7 @@ Dieses Projekt entwickelt ein Data-Engineering-System zur Analyse von Stromkoste
 
 ### Frage 2: Lastspitzen-Analyse (Operations-Perspektive)
 
-**Kernfrage:** Welche Produktionslinien verursachten in Q4 2024 wiederholt Lastspitzen >500 kW, und in welchen Schichten traten diese gehäuft auf?
+**Kernfrage:** Welche Produktionslinien und Schichten sind die systematischen Treiber für die Überschreitung der 500kW-Lastgrenze? (Schwellenwert (>500kW) ist der Auslöser für Kosten)
 
 | **Aspekt** | **Spezifikation** |
 |---|---|
@@ -46,7 +46,7 @@ Dieses Projekt entwickelt ein Data-Engineering-System zur Analyse von Stromkoste
 
 ### Frage 3: Lieferantenpreis-Analyse (Einkaufs-Perspektive)
 
-**Kernfrage:** Wie haben sich die durchschnittlichen Einkaufspreise (€/kWh) pro Lieferant im Zeitraum 2023–2024 im Vergleich zum Spotmarkt entwickelt, und welche Lieferanten zeigen die geringste Preisvolatilität?
+**Kernfrage:** Wie hoch ist der effektive Preisaufschlag (Premium) unserer Lieferanten gegenüber dem Spotmarkt-Benchmark im Zeitraum von 2023 - 2024?
 
 | **Aspekt** | **Spezifikation** |
 |---|---|
