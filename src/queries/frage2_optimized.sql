@@ -1,5 +1,6 @@
 -- ============================================================
--- FRAGE 2: Lastspitzen-Analyse (KISS)
+-- FRAGE 2: Lastspitzen-Analyse (MIT INDEX)
+-- Voraussetzung: idx_energie_leistung muss existieren
 -- ============================================================
 SELECT 
     s.standort_name,
@@ -15,17 +16,7 @@ JOIN dim_standort s ON l.standort_id = s.standort_id
 
 WHERE z.jahr = 2024
   AND z.monat IN (10, 11, 12)
-
-  -- ↓↓↓ DAS PERFORMANCE PROBLEM ↓↓↓
-  -- Warum: In Fakten-Tabellen sind meistens nur die IDs (Foreign Keys) indiziert, 
-  -- aber NICHT die Messwerte selbst (leistung_max_kw).
-  --
-  -- Konsequenz: "Full Table Scan" (oder Range Scan)
-  -- Die Datenbank muss JEDEN einzelnen Datensatz von Q4 von der Festplatte laden,
-  -- den Wert auspacken und prüfen, ob er > 500 ist.
-  -- Wenn 99% der Werte < 500 sind, hast du 99% der Lese-Zeit (I/O) komplett verschwendet.
-  AND e.leistung_max_kw > 500       
-
+  AND e.leistung_max_kw > 500
   AND e.messstatus = 'OK'
 
 GROUP BY s.standort_name, l.linie_code, z.schicht

@@ -11,10 +11,12 @@ def run_query(sql_file: str):
     sql_path = SCRIPT_DIR / sql_file
 
     with open(sql_path, "r", encoding="utf-8") as f:
-        query = f.read()
+        lines = f.readlines()
+
+    # SQLite CLI-Befehle (z.B. .timer, .scanstats) filtern
+    query = "".join(line for line in lines if not line.strip().startswith("."))
 
     conn = sqlite3.connect(DB_FILE)
-
     df = pd.read_sql(query, conn)
     conn.close()
 

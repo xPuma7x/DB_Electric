@@ -152,17 +152,31 @@ Dieses Projekt entwickelt ein Data-Engineering-System zur Analyse von Stromkoste
 # Abhängigkeiten installieren (mit uv)
 uv sync
 
-# Gesamtes Projekt ausführen (Generierung → Laden → Queries)
-uv run main.py
+# Gesamtes Projekt ausführen (Generierung → Laden → Queries → Visualisierung)
+uv run python main.py
 
-# Oder mit args
-uv run main.py --skip-generate --skip-load --visualize
-
-# Oder einzelne Schritte:
-uv run src.data_generation.generate_all   # Daten generieren
-uv run src.data_loading.load_to_sqlite    # In SQLite laden
-uv run src.queries.run_queries            # Queries ausführen
+# Einzelne Schritte:
+uv run python src/data_generation/generate_all.py   # Daten generieren
+uv run python src/data_loading/load_to_sqlite.py    # In SQLite laden
+uv run python src/queries/run_queries.py            # Queries ausführen
 ```
+
+### Benchmark
+
+```bash
+# SQL-Performance messen (3 Iterationen)
+uv run python src/benchmark.py -i 3
+
+# Mit frischer Datenbank (Reset)
+uv run python src/benchmark.py -r -i 5
+
+# Optionen:
+#   -r, --reset       Datenbank neu erstellen
+#   -i, --iterations  Anzahl Durchläufe (Standard: 3)
+#   -v, --verbose     Detaillierte Ausgabe
+```
+
+Ergebnisse werden in `output/benchmarks/` gespeichert (JSON, CSV).
 
 ---
 
@@ -180,25 +194,29 @@ DB_Electric/
 │   └── generated/                   # Generierte CSV-Dateien
 │       ├── dim_*.csv
 │       └── fact_*.csv
+├── output/
+│   ├── frage*_*.png                 # Visualisierungen
+│   └── benchmarks/                  # Benchmark-Ergebnisse
+│       ├── benchmark_*.json
+│       └── benchmark_*.csv
 └── src/
+    ├── benchmark.py                 # Performance-Messung
     ├── data_generation/             # Python-Generatoren
     │   ├── generate_all.py
-    │   ├── dim_standort.py
-    │   ├── dim_linie.py
-    │   ├── dim_lieferant.py
-    │   ├── dim_vertrag.py
-    │   ├── dim_zeit_gen.py
-    │   ├── fact_energie.py
-    │   ├── fact_production.py
-    │   ├── fact_spotmarkt.py
-    │   └── fact_lieferantenpreis.py
+    │   ├── dim_*.py
+    │   └── fact_*.py
     ├── data_loading/
     │   └── load_to_sqlite.py        # CSV → SQLite Import
     └── queries/
         ├── run_queries.py           # Query-Runner
-        ├── frage1.sql               # Stromkostenintensität
-        ├── frage2.sql               # Lastspitzen
-        └── frage3.sql               # Lieferantenpreise
+        ├── visualize.py             # Chart-Generierung
+        ├── setup_indexes.sql        # Benchmark-Indizes
+        ├── frage1.sql               # Stromkostenintensität (Naive)
+        ├── frage1_optimized.sql     # Stromkostenintensität (CTE)
+        ├── frage2.sql               # Lastspitzen (Naive)
+        ├── frage2_optimized.sql     # Lastspitzen (Index)
+        ├── frage3.sql               # Lieferantenpreise (UNION)
+        └── frage3_optimized.sql     # Lieferantenpreise (CTE)
 ```
 
 ---
@@ -221,10 +239,7 @@ FROM standort_kosten
 WHERE abweichung_pct > 15;
 ```
 
-**Performance:**
-- 5 CTEs mit jeweils GROUP BY über ~500k Zeilen
-- Indizes auf `zeit_id`, `linie_id` beschleunigen JOINs
-- Cold: ~2s, Warm: ~0.5s (SQLite)
+**Performance:** Siehe Benchmark-Sektion unten.
 
 ### Frage 2: Lastspitzen
 
@@ -250,6 +265,42 @@ WITH lieferant_quartalspreise AS (...),
          SELECT SQRT(AVG(x²) - AVG(x)²) AS volatilitaet ...
      )
 SELECT lieferant_name, avg_preis, aufschlag_pct, volatilitaet;
+```
+
+---
+
+## ⚡ Performance-Benchmark
+
+Vergleich zwischen naiven und optimierten SQL-Queries (30 Iterationen, SQLite):
+
+| Query | Naive | Optimiert | Speedup | Optimierung |
+|-------|------:|----------:|--------:|-------------|
+| Frage 1 (Stromkosten) | 580 ms | 549 ms | **1.1x** | CTE statt korrelierte Subquery |
+| Frage 2 (Lastspitzen) | 41 ms | 38 ms | **1.1x** | Partieller Index (wenig Effekt bei Star-Schema) |
+| Frage 3 (Lieferanten) | 338 ms | 177 ms | **1.9x** | CTE statt UNION ALL (DRY-Prinzip) |
+
+### Optimierungsstrategien
+
+**Frage 1 – CTE statt Subquery:**
+```sql
+-- Naive: Korrelierte Subquery (5x Nested Loop)
+SELECT ..., (SELECT SUM(...) WHERE standort_id = s.id) FROM ...
+
+-- Optimiert: Einmalige Aggregation, dann JOIN
+WITH prod_agg AS (SELECT standort_id, SUM(...) GROUP BY standort_id)
+SELECT ... FROM energie JOIN prod_agg ON ...
+```
+
+**Frage 3 – CTE statt UNION:**
+```sql
+-- Naive: dim_zeit wird 2x gescannt (je 70k Zeilen)
+SELECT ... FROM lieferanten JOIN dim_zeit WHERE jahr IN (2023,2024)
+UNION ALL
+SELECT ... FROM spotmarkt JOIN dim_zeit WHERE jahr IN (2023,2024)
+
+-- Optimiert: dim_zeit nur 1x scannen
+WITH relevante_zeit AS (SELECT zeit_id FROM dim_zeit WHERE jahr IN (2023,2024))
+SELECT ... FROM lieferanten JOIN relevante_zeit ...
 ```
 
 ---

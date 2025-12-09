@@ -17,7 +17,9 @@ def run_query(sql_file: str) -> pd.DataFrame:
     """Führt SQL-Datei aus und gibt DataFrame zurück."""
     sql_path = SCRIPT_DIR / sql_file
     with open(sql_path, "r", encoding="utf-8") as f:
-        query = f.read()
+        lines = f.readlines()
+    # SQLite CLI-Befehle (z.B. .timer, .scanstats) filtern
+    query = "".join(line for line in lines if not line.strip().startswith("."))
     conn = sqlite3.connect(DB_FILE)
     df = pd.read_sql(query, conn)
     conn.close()
@@ -32,8 +34,8 @@ def plot_frage1():
     df = run_query("frage1.sql")
 
     # Stückkosten berechnen
-    df["kosten_pro_stueck"] = (df["verbrauch_kwh"] * df["avg_preis_eur_kwh"]) / df[
-        "menge_stueck"
+    df["kosten_pro_stueck"] = (df["gesamt_energie"] * df["durchschnittspreis"]) / df[
+        "gesamt_menge"
     ]
     durchschnitt = df["kosten_pro_stueck"].mean()
     df["abweichung_pct"] = (df["kosten_pro_stueck"] - durchschnitt) / durchschnitt * 100
