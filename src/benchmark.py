@@ -17,7 +17,6 @@ OUTPUT_DIR = PROJECT_DIR / "output" / "benchmarks"
 
 QUERIES = [
     ("Frage1", "src/queries/frage1.sql", "Stromkosten (Naive)"),
-    ("Frage1_Opt", "src/queries/frage1_optimized.sql", "Stromkosten (CTE)"),
     ("Frage2", "src/queries/frage2.sql", "Lastspitzen (Naive)"),
     ("Frage2_Opt", "src/queries/frage2_optimized.sql", "Lastspitzen (Index)"),
     ("Frage3", "src/queries/frage3.sql", "Lieferanten (UNION)"),
@@ -35,12 +34,20 @@ def reset_database():
 
 def setup_indexes(db_path: Path):
     """Benchmark-Indizes erstellen."""
-    setup_file = PROJECT_DIR / "src" / "queries" / "setup_indexes.sql"
-    if setup_file.exists():
-        print("[SETUP] Indizes erstellen...")
-        conn = sqlite3.connect(db_path)
-        conn.executescript(setup_file.read_text(encoding="utf-8"))
-        conn.close()
+    conn = sqlite3.connect(db_path)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_energie_leistung 
+        ON fact_energie(leistung_max_kw) 
+        WHERE leistung_max_kw > 500
+    """)
+    conn.close()
+
+
+def drop_indexes(db_path: Path):
+    """Benchmark-Indizes entfernen."""
+    conn = sqlite3.connect(db_path)
+    conn.execute("DROP INDEX IF EXISTS idx_energie_leistung")
+    conn.close()
 
 
 def run_query(db_path: Path, query_file: Path, iterations: int) -> dict:
@@ -89,12 +96,18 @@ def main():
         print(f"FEHLER: Datenbank '{DB_FILE}' nicht gefunden!")
         return 1
 
-    setup_indexes(DB_FILE)
+    # Indizes entfernen für fairen Vergleich
+    drop_indexes(DB_FILE)
 
     print("-" * 54)
 
     results = []
     for name, file, description in QUERIES:
+        # Index NUR für optimierte Frage2 erstellen
+        if name == "Frage2_Opt":
+            print("\n[INDEX] Erstelle idx_energie_leistung...")
+            setup_indexes(DB_FILE)
+
         query_file = PROJECT_DIR / file
         print(f"\n>> {description}")
         print(f"   Datei: {file}")
@@ -170,4 +183,3 @@ def main():
 
 if __name__ == "__main__":
     exit(main())
-

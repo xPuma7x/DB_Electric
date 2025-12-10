@@ -1,45 +1,22 @@
--- ============================================================
--- FRAGE 3: Lieferantenpreis-Analyse (CTE Optimiert)
--- ============================================================
-WITH 
--- 1. Der "Scope": Einmal definiert, überall genutzt (DRY Prinzip)
--- Performance-Vorteil: Der Zeit-Index wird nur 1x gescannt.
-relevante_zeit AS (
-    SELECT zeit_id, jahr 
-    FROM dim_zeit 
-    WHERE jahr IN (2023, 2024)
-),
-
--- 2. Aggregation Lieferanten (Nur im Scope)
-lieferanten_agg AS (
-    SELECT 
-        lp.lieferant_id,
-        AVG(lp.preis_eur_kwh) as ist_preis
-    FROM fact_lieferantenpreis lp
-    JOIN relevante_zeit rz ON lp.zeit_id = rz.zeit_id
-    GROUP BY lp.lieferant_id
-),
-
--- 3. Aggregation Markt (Nur im Scope)
-markt_agg AS (
-    SELECT 
-        AVG(s.preis_eur_kwh) as markt_preis
-    FROM fact_spotmarkt s
-    JOIN relevante_zeit rz ON s.zeit_id = rz.zeit_id
+-- 1. DER ZETTEL (Das hier passiert nur 1x)
+WITH mein_zeit_zettel AS (
+    SELECT zeit_id FROM dim_zeit WHERE jahr IN (2023, 2024)
 )
 
--- 4. Der Vergleich (JOIN statt UNION)
+-- 2. Person A (Lieferanten) nutzt den Zettel
 SELECT 
-    l.lieferant_name,
-    l.typ,
-    ROUND(la.ist_preis, 4) as unser_preis,
-    ROUND(ma.markt_preis, 4) as markt_referenz,
-    
-    -- Der eigentliche Mehrwert: Die Berechnung des Aufschlags (Delta)
-    ROUND(la.ist_preis - ma.markt_preis, 4) as aufschlag_eur,
-    ROUND(((la.ist_preis - ma.markt_preis) / ma.markt_preis) * 100, 1) || '%' as aufschlag_prozent
+    lf.lieferant_name, 
+    AVG(lp.preis_eur_kwh)
+FROM fact_lieferantenpreis lp
+JOIN dim_lieferant lf ON lp.lieferant_id = lf.lieferant_id
+JOIN mein_zeit_zettel z ON lp.zeit_id = z.zeit_id -- < Hier wird der Zettel genutzt
+GROUP BY lf.lieferant_name
 
-FROM lieferanten_agg la
-JOIN dim_lieferant l ON la.lieferant_id = l.lieferant_id
-CROSS JOIN markt_agg ma -- Da Markt nur 1 Zeile ist, ist Cross Join okay
-ORDER BY aufschlag_eur DESC;
+UNION ALL
+
+-- 3. Person B (Spotmarkt) nutzt DEN GLEICHEN Zettel
+SELECT 
+    'Spotmarkt', 
+    AVG(s.preis_eur_kwh)
+FROM fact_spotmarkt s
+JOIN mein_zeit_zettel z ON s.zeit_id = z.zeit_id; -- < Hier wird der Zettel nochmal genutzt

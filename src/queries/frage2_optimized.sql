@@ -1,6 +1,6 @@
 -- ============================================================
 -- FRAGE 2: Lastspitzen-Analyse (MIT INDEX)
--- Voraussetzung: idx_energie_leistung muss existieren
+-- Voraussetzung: idx_energie_leistung (siehe setup_indexes.sql)
 -- ============================================================
 SELECT 
     s.standort_name,
