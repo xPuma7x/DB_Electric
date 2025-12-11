@@ -293,7 +293,7 @@ Entwicklung eines analytischen Datenmodells zur Beantwortung von drei Business-F
 ---
 
 ## Team
-Julian Kenk 2853745
-Mario Raach
+Julian Kenk (Matrikelnummer: 2853745)
+Mario Raach (Matrikelnummer: 2357634)
 Finean Rentel
 WDS24A – Datenbanken, 3. Semester
