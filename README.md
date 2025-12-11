@@ -293,5 +293,7 @@ Entwicklung eines analytischen Datenmodells zur Beantwortung von drei Business-F
 ---
 
 ## Team
-
+Julian Kenk 2853745
+Mario Raach
+Finean Rentel
 WDS24A – Datenbanken, 3. Semester
